@@ -23,12 +23,19 @@ ligne de code n'a été reprise d'un projet tiers.
 - **API REST** complète et documentée automatiquement (`/docs`), en plus de
   l'UI web.
 - **Auth** simple par compte admin (JWT), partagée entre l'UI et l'API.
+- **Frontend Next.js** (`web/`) : interface moderne (React Server Components,
+  Server Actions) consommant l'API REST FastAPI via un pattern BFF — le JWT
+  reste côté serveur dans un cookie httpOnly, jamais exposé au JS client.
+- **Optimisation de tournée (optionnelle)** : bouton "Optimiser la tournée"
+  sur le tableau de dispatch, qui appelle le Scheduler API self-service de
+  Nomadia (https://scheduler-json-api.readme.io) pour calculer une proposition
+  d'affectation. Désactivé par défaut — voir "Intégration Nomadia" ci-dessous.
 
 ## Ce que ça ne fait volontairement PAS (pour l'instant)
 
-- Pas de moteur d'optimisation de tournées (multi-stop routing, contraintes
-  de capacité, etc.) — ce n'est pas l'objectif de ce projet de référence, et
-  ce serait un travail à part entière.
+- Pas de moteur d'optimisation de tournées *maison* (c'est pour ça que
+  l'intégration Nomadia ci-dessus est optionnelle et externe, pas une
+  fonctionnalité réinventée).
 - Pas de notifications SMS/email, pas de suivi GPS temps réel, pas
   d'application mobile native.
 - Pas de multi-société/multi-tenant.
@@ -48,7 +55,18 @@ uvicorn app.main:app --reload
 
 Puis ouvre http://localhost:8000 — identifiants de démo : `admin` / la valeur
 de `ADMIN_PASSWORD` dans `.env` (par défaut `change-me`, à changer avant toute
-exposition publique).
+exposition publique). (C'est l'ancienne UI serveur Jinja2 ; voir ci-dessous
+pour lancer le frontend Next.js.)
+
+### Frontend Next.js (`web/`)
+
+```bash
+cd web
+npm install
+FIELDFORGE_API_URL=http://localhost:8000 npm run dev
+```
+
+Puis ouvre http://localhost:3000 — mêmes identifiants que l'API ci-dessus.
 
 ## Tester sans rien installer (GitHub Codespaces)
 
@@ -77,9 +95,31 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-L'appli écoute sur le port défini par `APP_PORT` (8000 par défaut). Mets un
-reverse proxy (Caddy, Nginx, Traefik) devant pour le HTTPS si c'est exposé sur
+L'appli FastAPI écoute sur le port défini par `APP_PORT` (8000 par défaut),
+et le frontend Next.js sur `WEB_PORT` (3000 par défaut) — `docker compose up`
+démarre les deux services (`app` et `web`) plus Postgres. Mets un reverse
+proxy (Caddy, Nginx, Traefik) devant pour le HTTPS si c'est exposé sur
 Internet — ce projet ne gère pas TLS lui-même.
+
+## Intégration Nomadia (optimisation de tournée, optionnelle)
+
+FieldForge peut déléguer le calcul d'une tournée optimisée au Scheduler API
+**self-service** de Nomadia (documentation publique :
+https://scheduler-json-api.readme.io) — un appel API tiers classique, pas une
+reprise de schéma propriétaire.
+
+Pour l'activer, renseigne dans `.env` :
+
+```
+NOMADIA_BASE_URL=https://scheduler-api-test.nomadia-app.com
+NOMADIA_API_KEY=<ta clé self-service>
+```
+
+Tant que `NOMADIA_API_KEY` est vide, le bouton "Optimiser la tournée" reste
+désactivé et FieldForge fonctionne normalement sans cette fonctionnalité —
+aucune dépendance dure. L'intégration n'envoie que les champs du schéma
+self-service documenté publiquement ; elle ne reproduit pas le schéma de
+l'offre complète Nomadia (projet dédié, hors self-service).
 
 ## Structure du projet
 
@@ -89,11 +129,16 @@ app/
   models.py        modèle de données (SQLAlchemy)
   schemas.py        schémas API (Pydantic)
   security.py       auth (JWT + hash de mot de passe)
-  routers/          API REST (JSON) + UI (HTML serveur)
-  templates/        pages HTML (Jinja2)
+  routers/          API REST (JSON) + UI (HTML serveur) + optimize.py (Nomadia)
+  services/         nomadia.py — client du Scheduler API self-service
+  templates/        pages HTML (Jinja2, ancienne UI — toujours fonctionnelle)
   static/           CSS + fichiers uploadés
 scripts/
   seed_demo_data.py création du compte admin + données de démo
+web/
+  app/(app)/        pages Next.js protégées (dashboard, jobs, dispatch, …)
+  app/login/        page de connexion
+  lib/               client API (BFF) + session JWT (cookie httpOnly)
 ```
 
 ## Licence

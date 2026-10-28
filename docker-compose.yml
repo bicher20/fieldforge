@@ -30,6 +30,17 @@ services:
     volumes:
       - fieldforge_uploads:/srv/app/app/static/uploads
 
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      FIELDFORGE_API_URL: http://app:8000
+      NODE_ENV: production
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+
 volumes:
   fieldforge_db:
   fieldforge_uploads:

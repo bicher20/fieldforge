@@ -10,7 +10,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.database import Base, engine
-from app.routers import auth, customers, jobs, locations, resources, skills, teams, ui
+from app.routers import auth, customers, jobs, locations, optimize, resources, skills, teams, ui
 
 app = FastAPI(
     title="FieldForge",
@@ -30,6 +30,7 @@ app.include_router(resources.router)
 app.include_router(skills.router)
 app.include_router(teams.router)
 app.include_router(jobs.router)
+app.include_router(optimize.router)
 app.include_router(ui.router)
 
 

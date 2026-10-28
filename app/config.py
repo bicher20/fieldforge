@@ -37,6 +37,12 @@ class Settings:
 
     upload_dir: str = os.getenv("UPLOAD_DIR", "app/static/uploads")
 
+    # Intégration OPTIONNELLE du Scheduler API Nomadia (optimisation de tournée).
+    # FieldForge reste utilisable sans elle — tant que NOMADIA_API_KEY est vide, le
+    # bouton "Optimiser la tournée" reste désactivé ; aucune dépendance dure.
+    nomadia_base_url: str = os.getenv("NOMADIA_BASE_URL", "https://scheduler-api-test.nomadia-app.com")
+    nomadia_api_key: str = os.getenv("NOMADIA_API_KEY", "")
+
 
 @lru_cache
 def get_settings() -> Settings:
