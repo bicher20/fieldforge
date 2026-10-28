@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fieldforge
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fieldforge}
+      POSTGRES_DB: fieldforge
+    volumes:
+      - fieldforge_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fieldforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://fieldforge:${POSTGRES_PASSWORD:-fieldforge}@db:5432/fieldforge
+      JWT_SECRET: ${JWT_SECRET:?Défini un JWT_SECRET dans .env avant de lancer en production}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Défini un ADMIN_PASSWORD dans .env}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - fieldforge_uploads:/srv/app/app/static/uploads
+
+volumes:
+  fieldforge_db:
+  fieldforge_uploads:

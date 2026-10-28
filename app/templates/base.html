@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FieldForge{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  {% if username %}
+  <nav>
+    <span class="brand">FieldForge</span>
+    <a href="/">Tableau de bord</a>
+    <a href="/jobs">Interventions</a>
+    <a href="/dispatch">Dispatch</a>
+    <a href="/resources">Ressources</a>
+    <a href="/directory">Annuaire</a>
+    <a href="/docs">API</a>
+    <span class="spacer"></span>
+    <span class="user">{{ username }}</span>
+    <a href="/logout">Déconnexion</a>
+  </nav>
+  {% endif %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

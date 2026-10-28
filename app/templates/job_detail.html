@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ job.title }} — FieldForge{% endblock %}
+{% block content %}
+<h1>{{ job.title }} <span class="badge {{ job.status.value }}">{{ job.status.value }}</span></h1>
+
+<div class="card">
+  <p><strong>Priorité :</strong> {{ job.priority.value }}</p>
+  <p><strong>Type :</strong> {{ job.job_type or "—" }}</p>
+  <p><strong>Description :</strong> {{ job.description or "—" }}</p>
+  <p><strong>Créneau :</strong>
+    {% if job.window_start %}{{ job.window_start.strftime("%d/%m/%Y %H:%M") }}{% else %}—{% endif %}
+    →
+    {% if job.window_end %}{{ job.window_end.strftime("%d/%m/%Y %H:%M") }}{% else %}—{% endif %}
+  </p>
+  <p><strong>Compétences requises :</strong>
+    {{ job.required_skills | map(attribute="name") | join(", ") if job.required_skills else "—" }}
+  </p>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Affectation</h2>
+  <form method="post" action="/jobs/{{ job.id }}/assign">
+    <select name="resource_id">
+      <option value="">— aucune —</option>
+      {% for r in resources %}
+      <option value="{{ r.id }}" {% if job.assigned_resource_id == r.id %}selected{% endif %}>{{ r.name }} ({{ r.role }})</option>
+      {% endfor %}
+    </select>
+    <input type="submit" value="Affecter">
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Workflow</h2>
+  {% if job.status.value == "scheduled" %}
+  <form method="post" action="/jobs/{{ job.id }}/start" style="display:inline">
+    <input type="submit" value="Démarrer l'intervention">
+  </form>
+  {% endif %}
+  {% if job.status.value == "in_progress" %}
+  <form method="post" action="/jobs/{{ job.id }}/close" style="display:inline">
+    <input type="text" name="closing_comment" placeholder="Commentaire de clôture">
+    <input type="submit" value="Clôturer">
+  </form>
+  {% endif %}
+  {% if job.status.value not in ["done", "cancelled"] %}
+  <form method="post" action="/jobs/{{ job.id }}/cancel" style="display:inline">
+    <button type="submit" class="danger">Annuler</button>
+  </form>
+  {% endif %}
+  {% if job.closing_comment %}<p><strong>Clôturé :</strong> {{ job.closing_comment }}</p>{% endif %}
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">Preuves terrain</h2>
+  <form method="post" action="/jobs/{{ job.id }}/signature" enctype="multipart/form-data">
+    <label>Signature client (image)</label>
+    <input type="file" name="file" accept="image/*" required>
+    <input type="submit" value="Envoyer la signature">
+  </form>
+  {% if job.signature_file %}<p>Signature enregistrée : {{ job.signature_file }}</p>{% endif %}
+
+  <form method="post" action="/jobs/{{ job.id }}/photos" enctype="multipart/form-data">
+    <label>Photo (avant/après)</label>
+    <input type="file" name="file" accept="image/*" required>
+    <input type="submit" value="Ajouter une photo">
+  </form>
+  {% if photos %}<p>{{ photos | length }} photo(s) enregistrée(s) : {{ photos | join(", ") }}</p>{% endif %}
+</div>
+{% endblock %}

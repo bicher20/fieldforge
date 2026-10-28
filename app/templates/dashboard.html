@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — FieldForge{% endblock %}
+{% block content %}
+<h1>Tableau de bord</h1>
+<div class="grid">
+  {% for status, count in counts.items() %}
+  <div class="card stat">
+    <div class="n">{{ count }}</div>
+    <div class="l">{{ status }}</div>
+  </div>
+  {% endfor %}
+</div>
+<div class="card">
+  <p><strong>{{ unassigned }}</strong> intervention(s) en brouillon sans ressource affectée.
+  <a href="/jobs?status_filter=draft">Voir</a></p>
+</div>
+<p>
+  <a class="button" href="/jobs/new">+ Nouvelle intervention</a>
+</p>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Ressources — FieldForge{% endblock %}
+{% block content %}
+<h1>Ressources</h1>
+<table>
+  <tr><th>Nom</th><th>Rôle</th><th>Équipe</th><th>Compétences</th><th>Actif</th></tr>
+  {% for r in resources %}
+  <tr>
+    <td>{{ r.name }}</td>
+    <td>{{ r.role }}</td>
+    <td>{{ r.team.name if r.team else "—" }}</td>
+    <td>{{ r.skills | map(attribute="name") | join(", ") if r.skills else "—" }}</td>
+    <td>{{ "oui" if r.active else "non" }}</td>
+  </tr>
+  {% else %}
+  <tr><td colspan="5">Aucune ressource.</td></tr>
+  {% endfor %}
+</table>
+
+<h2>Ajouter une ressource</h2>
+<form method="post" action="/resources/new" class="card">
+  <label>Nom</label>
+  <input type="text" name="name" required>
+  <label>Rôle</label>
+  <input type="text" name="role" value="technician">
+  <label>Téléphone</label>
+  <input type="text" name="phone">
+  <label>Email</label>
+  <input type="email" name="email">
+  <label>Véhicule</label>
+  <input type="text" name="vehicle_label">
+  <label>Équipe</label>
+  <select name="team_id">
+    <option value="">—</option>
+    {% for t in teams %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+  </select>
+  <label>Compétences</label>
+  <select name="skill_ids" multiple size="5">
+    {% for s in skills %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+  </select>
+  <input type="submit" value="Ajouter">
+</form>
+{% endblock %}

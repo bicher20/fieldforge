@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Dispatch — FieldForge{% endblock %}
+{% block content %}
+<h1>Dispatch board</h1>
+<div class="board">
+  {% for status, jobs in columns.items() %}
+  <div class="column">
+    <h3>{{ status.value }} ({{ jobs | length }})</h3>
+    {% for job in jobs %}
+    <div class="job-card">
+      <a href="/jobs/{{ job.id }}">{{ job.title }}</a>
+      <div style="font-size:0.8rem;color:var(--muted)">
+        {% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% endif %}
+        {% if job.assigned_resource %} — {{ job.assigned_resource.name }}{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

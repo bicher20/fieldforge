@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Interventions — FieldForge{% endblock %}
+{% block content %}
+<h1>Interventions</h1>
+<p>
+  <a href="/jobs" class="button secondary">Toutes</a>
+  {% for s in statuses %}
+  <a href="/jobs?status_filter={{ s.value }}" class="button secondary">{{ s.value }}</a>
+  {% endfor %}
+  <a href="/jobs/new" class="button">+ Nouvelle</a>
+</p>
+<table>
+  <tr><th>Titre</th><th>Statut</th><th>Priorité</th><th>Créneau</th><th>Ressource</th><th></th></tr>
+  {% for job in jobs %}
+  <tr>
+    <td><a href="/jobs/{{ job.id }}">{{ job.title }}</a></td>
+    <td><span class="badge {{ job.status.value }}">{{ job.status.value }}</span></td>
+    <td>{{ job.priority.value }}</td>
+    <td>{% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% else %}—{% endif %}</td>
+    <td>
+      {% set assigned = resources | selectattr("id", "equalto", job.assigned_resource_id) | list %}
+      {{ assigned[0].name if assigned else "—" }}
+    </td>
+    <td><a href="/jobs/{{ job.id }}">détail</a></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="6">Aucune intervention.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}
