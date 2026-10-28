@@ -13,6 +13,7 @@ export function OptimizePanel({ jobsById, resourcesById, configured }: {
   const [applying, startApplying] = useTransition();
   const [result, setResult] = useState<Awaited<ReturnType<typeof optimizeAction>> | null>(null);
   const [applied, setApplied] = useState(false);
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   if (!configured) {
     return (
@@ -31,25 +32,40 @@ export function OptimizePanel({ jobsById, resourcesById, configured }: {
             Calcule l&apos;affectation et l&apos;ordre optimaux via le Scheduler API Nomadia pour les interventions non terminées du jour.
           </div>
         </div>
-        <button
-          disabled={pending}
-          onClick={() =>
-            startTransition(async () => {
-              setApplied(false);
-              const r = await optimizeAction();
-              setResult(r);
-            })
-          }
-          className="flex-shrink-0 rounded-md border border-accent bg-accent px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
-        >
-          {pending ? "Calcul en cours…" : "Optimiser la tournée"}
-        </button>
+        <div className="flex flex-shrink-0 items-center gap-2">
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="rounded-md border border-border bg-surface px-2.5 py-2 text-sm"
+          />
+          <button
+            disabled={pending}
+            onClick={() =>
+              startTransition(async () => {
+                setApplied(false);
+                const r = await optimizeAction(date);
+                setResult(r);
+              })
+            }
+            className="rounded-md border border-accent bg-accent px-3.5 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+          >
+            {pending ? "Calcul en cours…" : "Optimiser la tournée"}
+          </button>
+        </div>
       </div>
 
       {result && (
         <div className="mt-4 border-t border-border pt-4">
           {result.error && <p className="text-sm text-stop">{result.error}</p>}
-          {!result.error && (
+          {!result.error && result.sentJobs === 0 && (
+            <p className="text-sm text-text-soft">
+              {result.message ?? "Aucune intervention éligible."} Vérifie que les interventions sont en brouillon/planifiée,
+              non assignées à un créneau passé, et que leur site a bien des coordonnées (latitude/longitude) — ajoute-les
+              depuis l&apos;<a href="/directory" className="font-medium text-accent hover:underline">annuaire</a> si besoin.
+            </p>
+          )}
+          {!result.error && result.sentJobs > 0 && (
             <>
               <p className="mb-2 text-sm text-text-soft">
                 {result.sentJobs} intervention(s) envoyée(s) · {result.allocations.length} affectation(s) proposée(s)

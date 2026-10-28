@@ -55,6 +55,8 @@ export const listJobs = (statusFilter?: string) =>
 export const getJob = (id: number) => request<Job>(`/api/jobs/${id}`);
 export const createJob = (payload: Record<string, unknown>) =>
   request<Job>("/api/jobs", { method: "POST", body: JSON.stringify(payload) });
+export const updateJob = (id: number, payload: Record<string, unknown>) =>
+  request<Job>(`/api/jobs/${id}`, { method: "PUT", body: JSON.stringify(payload) });
 export const assignJob = (id: number, resourceId: number | null) =>
   request<Job>(`/api/jobs/${id}/assign`, {
     method: "POST",
@@ -75,8 +77,11 @@ export const uploadPhoto = (id: number, form: FormData) =>
 // --- Référentiel ----------------------------------------------------------
 
 export const listResources = () => request<Resource[]>("/api/resources");
+export const getResource = (id: number) => request<Resource>(`/api/resources/${id}`);
 export const createResource = (payload: Record<string, unknown>) =>
   request<Resource>("/api/resources", { method: "POST", body: JSON.stringify(payload) });
+export const updateResource = (id: number, payload: Record<string, unknown>) =>
+  request<Resource>(`/api/resources/${id}`, { method: "PUT", body: JSON.stringify(payload) });
 
 export const listCustomers = () => request<Customer[]>("/api/customers");
 export const createCustomer = (payload: Record<string, unknown>) =>

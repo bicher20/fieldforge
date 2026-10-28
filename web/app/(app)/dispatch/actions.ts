@@ -3,17 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { applyOptimize, ApiError, type OptimizeAllocation, runOptimize } from "@/lib/api";
 
-export async function optimizeAction(): Promise<{
+export async function optimizeAction(date?: string): Promise<{
   error: string | null;
+  message: string | null;
   sentJobs: number;
   allocations: OptimizeAllocation[];
   unallocated: { job_id: string; unallocated_reason: string }[];
   resourceByRef: Record<string, number>;
 }> {
   try {
-    const res = await runOptimize();
+    const res = await runOptimize(date);
     if (!res.result) {
-      return { error: res.message ?? "Aucune intervention éligible.", sentJobs: 0, allocations: [], unallocated: [], resourceByRef: {} };
+      return {
+        error: null,
+        message: res.message ?? "Aucune intervention éligible.",
+        sentJobs: 0,
+        allocations: [],
+        unallocated: [],
+        resourceByRef: {},
+      };
     }
     const allocations: OptimizeAllocation[] = [];
     for (const a of res.result.allocations) {
@@ -28,6 +36,7 @@ export async function optimizeAction(): Promise<{
     }
     return {
       error: null,
+      message: null,
       sentJobs: res.sent_jobs,
       allocations,
       unallocated: res.result.unallocated_job_reasons ?? [],
@@ -35,7 +44,7 @@ export async function optimizeAction(): Promise<{
     };
   } catch (err) {
     const msg = err instanceof ApiError ? err.message : "Erreur d'appel à l'API d'optimisation.";
-    return { error: msg, sentJobs: 0, allocations: [], unallocated: [], resourceByRef: {} };
+    return { error: msg, message: null, sentJobs: 0, allocations: [], unallocated: [], resourceByRef: {} };
   }
 }
 

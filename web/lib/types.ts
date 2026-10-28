@@ -25,6 +25,8 @@ export interface Location {
   city: string | null;
   postal_code: string | null;
   zone: string | null;
+  latitude: number | null;
+  longitude: number | null;
   customer_id: number | null;
 }
 
