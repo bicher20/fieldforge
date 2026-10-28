@@ -71,7 +71,7 @@ export default async function DashboardPage() {
       </div>
 
       <SectionHeading count={recent.length}>Interventions récentes</SectionHeading>
-      <div className="overflow-hidden rounded-md border border-border bg-surface shadow-sm">
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm">
         <table className="w-full border-collapse text-[0.85rem]">
           <thead>
             <tr className="bg-surface-alt text-left text-[0.72rem] uppercase tracking-wide text-text-soft">
