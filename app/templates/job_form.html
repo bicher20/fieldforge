@@ -1,38 +1,59 @@
 {% extends "base.html" %}
 {% block title %}Nouvelle intervention — FieldForge{% endblock %}
 {% block content %}
-<h1>Nouvelle intervention</h1>
-<form method="post" action="/jobs/new" class="card">
-  <label>Titre</label>
-  <input type="text" name="title" required>
-  <label>Description</label>
-  <textarea name="description" rows="3"></textarea>
-  <label>Type d'intervention</label>
-  <input type="text" name="job_type" placeholder="ex: maintenance, installation, dépannage">
-  <label>Priorité</label>
-  <select name="priority">
-    {% for p in priorities %}<option value="{{ p.value }}">{{ p.value }}</option>{% endfor %}
-  </select>
-  <label>Durée estimée (minutes)</label>
-  <input type="number" name="duration_minutes">
-  <label>Début de créneau</label>
-  <input type="datetime-local" name="window_start">
-  <label>Fin de créneau</label>
-  <input type="datetime-local" name="window_end">
-  <label>Client</label>
-  <select name="customer_id">
-    <option value="">—</option>
-    {% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-  </select>
-  <label>Site</label>
-  <select name="location_id">
-    <option value="">—</option>
-    {% for l in locations %}<option value="{{ l.id }}">{{ l.label }}</option>{% endfor %}
-  </select>
-  <label>Compétences requises</label>
-  <select name="required_skill_ids" multiple size="5">
-    {% for s in skills %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
-  </select>
-  <input type="submit" value="Créer">
-</form>
+<div class="page-head">
+  <div class="titles">
+    <h1>Nouvelle intervention</h1>
+    <div class="sub">Crée une intervention en brouillon, à affecter ensuite depuis le dispatch</div>
+  </div>
+</div>
+<div class="card" style="max-width:640px;">
+  <form method="post" action="/jobs/new">
+    <label>Titre</label>
+    <input type="text" name="title" required placeholder="ex: Remplacement vanne — Riad Atlas">
+    <label>Description</label>
+    <textarea name="description" rows="3"></textarea>
+    <div class="field-row">
+      <div>
+        <label>Type d'intervention</label>
+        <input type="text" name="job_type" placeholder="maintenance, installation, dépannage…">
+      </div>
+      <div>
+        <label>Priorité</label>
+        <select name="priority">
+          {% for p in priorities %}<option value="{{ p.value }}">{{ p.value }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div><label>Durée estimée (minutes)</label><input type="number" name="duration_minutes"></div>
+      <div></div>
+    </div>
+    <div class="field-row">
+      <div><label>Début de créneau</label><input type="datetime-local" name="window_start"></div>
+      <div><label>Fin de créneau</label><input type="datetime-local" name="window_end"></div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label>Client</label>
+        <select name="customer_id">
+          <option value="">—</option>
+          {% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Site</label>
+        <select name="location_id">
+          <option value="">—</option>
+          {% for l in locations %}<option value="{{ l.id }}">{{ l.label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <label>Compétences requises</label>
+    <select name="required_skill_ids" multiple size="5">
+      {% for s in skills %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+    </select>
+    <input type="submit" value="Créer l'intervention">
+  </form>
+</div>
 {% endblock %}

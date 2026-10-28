@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Dispatch — FieldForge{% endblock %}
 {% block content %}
-<h1>Dispatch board</h1>
+<div class="page-head">
+  <div class="titles">
+    <h1>Dispatch board</h1>
+    <div class="sub">Répartition des interventions par statut</div>
+  </div>
+</div>
 <div class="board">
   {% for status, jobs in columns.items() %}
-  <div class="column">
-    <h3>{{ status.value }} ({{ jobs | length }})</h3>
+  <div class="column" data-status="{{ status.value }}">
+    <h3>{{ status.value }} <span class="count">{{ jobs | length }}</span></h3>
     {% for job in jobs %}
     <div class="job-card">
       <a href="/jobs/{{ job.id }}">{{ job.title }}</a>
-      <div style="font-size:0.8rem;color:var(--muted)">
-        {% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% endif %}
-        {% if job.assigned_resource %} — {{ job.assigned_resource.name }}{% endif %}
+      <div class="meta">
+        {% if job.customer %}<span>{{ job.customer.name }}</span>{% endif %}
+        <span class="mono">
+          {% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% endif %}
+          {% if job.duration_minutes %} · {{ job.duration_minutes }} min{% endif %}
+        </span>
+        {% if job.assigned_resource %}<span>→ {{ job.assigned_resource.name }}</span>{% endif %}
       </div>
     </div>
+    {% else %}
+    <div class="empty-col">Aucune intervention</div>
     {% endfor %}
   </div>
   {% endfor %}

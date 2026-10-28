@@ -1,20 +1,72 @@
 {% extends "base.html" %}
 {% block title %}Tableau de bord — FieldForge{% endblock %}
 {% block content %}
-<h1>Tableau de bord</h1>
-<div class="grid">
+{% set colors = {"draft": "var(--stone)", "scheduled": "var(--accent)", "in_progress": "var(--route)", "done": "var(--clear)", "cancelled": "var(--stop)"} %}
+<div class="page-head">
+  <div class="titles">
+    <h1>Tableau de bord</h1>
+    <div class="sub">Vue d'ensemble de l'activité en cours</div>
+  </div>
+  <div class="actions"><a class="button" href="/jobs/new">+ Nouvelle intervention</a></div>
+</div>
+
+{% if unassigned %}
+<div class="notice">
+  <span><strong>{{ unassigned }}</strong> intervention{{ "s" if unassigned != 1 }} en brouillon sans ressource affectée.</span>
+  <a href="/jobs?status_filter=draft">Affecter maintenant</a>
+</div>
+{% endif %}
+
+<h2>Par statut</h2>
+<div class="kpi-row">
   {% for status, count in counts.items() %}
-  <div class="card stat">
+  <div class="kpi" style="--stat-color: {{ colors.get(status, 'var(--border-strong)') }}">
+    <div class="top"><span class="l">{{ status }}</span><span class="swatch"></span></div>
     <div class="n">{{ count }}</div>
-    <div class="l">{{ status }}</div>
   </div>
   {% endfor %}
 </div>
-<div class="card">
-  <p><strong>{{ unassigned }}</strong> intervention(s) en brouillon sans ressource affectée.
-  <a href="/jobs?status_filter=draft">Voir</a></p>
+
+<h2>Aperçu opérationnel</h2>
+<div class="kpi-row" style="grid-template-columns: repeat(3, 1fr);">
+  <div class="kpi">
+    <div class="top"><span class="l">Interventions actives</span></div>
+    <div class="n">{{ active_jobs }}</div>
+  </div>
+  <div class="kpi">
+    <div class="top"><span class="l">Ressources disponibles</span></div>
+    <div class="n">{{ resource_count }}</div>
+  </div>
+  <div class="kpi">
+    <div class="top"><span class="l">Clients</span></div>
+    <div class="n">{{ customer_count }}</div>
+  </div>
 </div>
-<p>
-  <a class="button" href="/jobs/new">+ Nouvelle intervention</a>
-</p>
+
+<h2>Interventions récentes <span class="count">{{ recent_jobs | length }}</span></h2>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Intervention</th><th>Statut</th><th>Priorité</th><th>Client</th><th>Ressource</th><th>Créneau</th></tr>
+    </thead>
+    <tbody>
+      {% for job in recent_jobs %}
+      <tr>
+        <td><a href="/jobs/{{ job.id }}">{{ job.title }}</a><div class="cell-meta">{{ job.job_type or "intervention" }} · #{{ "%04d" | format(job.id) }}</div></td>
+        <td><span class="badge {{ job.status.value }}">{{ job.status.value }}</span></td>
+        <td>
+          <span class="priority {{ 'urgent' if job.priority.value == 'urgent' else ('high' if job.priority.value == 'high' else '') }}">
+            <span class="bar"></span>{{ job.priority.value }}
+          </span>
+        </td>
+        <td>{{ job.customer.name if job.customer else "—" }}</td>
+        <td>{{ job.assigned_resource.name if job.assigned_resource else "—" }}</td>
+        <td class="num">{% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% else %}—{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr class="empty-row"><td colspan="6">Aucune intervention pour l'instant. Crée la première pour voir l'activité ici.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

@@ -64,10 +64,23 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
 
     counts = {s.value: db.query(Job).filter(Job.status == s).count() for s in JobStatus}
     unassigned = db.query(Job).filter(Job.assigned_resource_id.is_(None), Job.status == JobStatus.draft).count()
+    recent_jobs = db.query(Job).order_by(Job.created_at.desc()).limit(8).all()
+    resource_count = db.query(Resource).filter(Resource.active == True).count()  # noqa: E712
+    customer_count = db.query(Customer).count()
+    active_jobs = counts.get("scheduled", 0) + counts.get("in_progress", 0)
     return templates.TemplateResponse(
         request,
         "dashboard.html",
-        {"username": username, "counts": counts, "unassigned": unassigned},
+        {
+            "username": username,
+            "active": "dashboard",
+            "counts": counts,
+            "unassigned": unassigned,
+            "recent_jobs": recent_jobs,
+            "resource_count": resource_count,
+            "customer_count": customer_count,
+            "active_jobs": active_jobs,
+        },
     )
 
 
@@ -85,7 +98,7 @@ def jobs_list(request: Request, status_filter: str | None = None, db: Session = 
     return templates.TemplateResponse(
         request,
         "jobs_list.html",
-        {"username": username, "jobs": jobs, "resources": resources, "statuses": list(JobStatus), "status_filter": status_filter},
+        {"username": username, "active": "jobs", "jobs": jobs, "resources": resources, "statuses": list(JobStatus), "status_filter": status_filter},
     )
 
 
@@ -99,6 +112,7 @@ def job_new_form(request: Request, db: Session = Depends(get_db)):
         "job_form.html",
         {
             "username": username,
+            "active": "jobs",
             "customers": db.query(Customer).order_by(Customer.name).all(),
             "locations": db.query(Location).order_by(Location.label).all(),
             "skills": db.query(Skill).order_by(Skill.name).all(),
@@ -156,7 +170,7 @@ def job_detail(request: Request, job_id: int, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request,
         "job_detail.html",
-        {"username": username, "job": job, "resources": resources, "photos": photos},
+        {"username": username, "active": "jobs", "job": job, "resources": resources, "photos": photos},
     )
 
 
@@ -246,7 +260,7 @@ def dispatch_board(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/login", status_code=303)
     jobs = db.query(Job).order_by(Job.window_start.asc().nulls_last()).all()
     columns = {s: [j for j in jobs if j.status == s] for s in JobStatus}
-    return templates.TemplateResponse(request, "dispatch_board.html", {"username": username, "columns": columns})
+    return templates.TemplateResponse(request, "dispatch_board.html", {"username": username, "active": "dispatch", "columns": columns})
 
 
 @router.get("/resources", response_class=HTMLResponse)
@@ -259,6 +273,7 @@ def resources_page(request: Request, db: Session = Depends(get_db)):
         "resources_list.html",
         {
             "username": username,
+            "active": "resources",
             "resources": db.query(Resource).order_by(Resource.name).all(),
             "teams": db.query(Team).order_by(Team.name).all(),
             "skills": db.query(Skill).order_by(Skill.name).all(),
@@ -309,6 +324,7 @@ def directory_page(request: Request, db: Session = Depends(get_db)):
         "directory.html",
         {
             "username": username,
+            "active": "directory",
             "customers": db.query(Customer).order_by(Customer.name).all(),
             "locations": db.query(Location).order_by(Location.label).all(),
             "skills": db.query(Skill).order_by(Skill.name).all(),

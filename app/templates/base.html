@@ -4,25 +4,43 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}FieldForge{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   {% if username %}
-  <nav>
-    <span class="brand">FieldForge</span>
-    <a href="/">Tableau de bord</a>
-    <a href="/jobs">Interventions</a>
-    <a href="/dispatch">Dispatch</a>
-    <a href="/resources">Ressources</a>
-    <a href="/directory">Annuaire</a>
-    <a href="/docs">API</a>
-    <span class="spacer"></span>
-    <span class="user">{{ username }}</span>
-    <a href="/logout">Déconnexion</a>
-  </nav>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="mark"></span>Field<span>Forge</span></div>
+      <nav>
+        <div class="section-label">Opérations</div>
+        <a href="/" class="{{ 'active' if active == 'dashboard' }}"><span class="dot"></span>Tableau de bord</a>
+        <a href="/jobs" class="{{ 'active' if active == 'jobs' }}"><span class="dot"></span>Interventions</a>
+        <a href="/dispatch" class="{{ 'active' if active == 'dispatch' }}"><span class="dot"></span>Dispatch</a>
+        <div class="section-label">Référentiel</div>
+        <a href="/resources" class="{{ 'active' if active == 'resources' }}"><span class="dot"></span>Ressources</a>
+        <a href="/directory" class="{{ 'active' if active == 'directory' }}"><span class="dot"></span>Annuaire</a>
+        <div class="section-label">Système</div>
+        <a href="/docs" class="{{ 'active' if active == 'api' }}"><span class="dot"></span>API</a>
+      </nav>
+      <div class="foot">
+        <div class="avatar">{{ username[0] | upper }}</div>
+        <div class="who">
+          <span class="name">{{ username }}</span>
+          <a href="/logout">Se déconnecter</a>
+        </div>
+      </div>
+    </aside>
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% else %}
+  <div class="login-shell">
+    {% block login_content %}{% endblock %}
+  </div>
   {% endif %}
-  <main>
-    {% block content %}{% endblock %}
-  </main>
 </body>
 </html>

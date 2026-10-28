@@ -1,30 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Interventions — FieldForge{% endblock %}
 {% block content %}
-<h1>Interventions</h1>
-<p>
-  <a href="/jobs" class="button secondary">Toutes</a>
+<div class="page-head">
+  <div class="titles">
+    <h1>Interventions</h1>
+    <div class="sub">{{ jobs | length }} résultat{{ "s" if jobs | length != 1 }}{% if status_filter %} — statut : {{ status_filter }}{% endif %}</div>
+  </div>
+  <div class="actions"><a class="button" href="/jobs/new">+ Nouvelle intervention</a></div>
+</div>
+
+<div class="button-row">
+  <a href="/jobs" class="button secondary {{ 'active' if not status_filter }}">Toutes</a>
   {% for s in statuses %}
-  <a href="/jobs?status_filter={{ s.value }}" class="button secondary">{{ s.value }}</a>
+  <a href="/jobs?status_filter={{ s.value }}" class="button secondary {{ 'active' if status_filter == s.value }}">{{ s.value }}</a>
   {% endfor %}
-  <a href="/jobs/new" class="button">+ Nouvelle</a>
-</p>
-<table>
-  <tr><th>Titre</th><th>Statut</th><th>Priorité</th><th>Créneau</th><th>Ressource</th><th></th></tr>
-  {% for job in jobs %}
-  <tr>
-    <td><a href="/jobs/{{ job.id }}">{{ job.title }}</a></td>
-    <td><span class="badge {{ job.status.value }}">{{ job.status.value }}</span></td>
-    <td>{{ job.priority.value }}</td>
-    <td>{% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% else %}—{% endif %}</td>
-    <td>
-      {% set assigned = resources | selectattr("id", "equalto", job.assigned_resource_id) | list %}
-      {{ assigned[0].name if assigned else "—" }}
-    </td>
-    <td><a href="/jobs/{{ job.id }}">détail</a></td>
-  </tr>
-  {% else %}
-  <tr><td colspan="6">Aucune intervention.</td></tr>
-  {% endfor %}
-</table>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Intervention</th><th>Statut</th><th>Priorité</th><th>Client</th><th>Site</th><th>Créneau</th><th>Ressource</th></tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td><a href="/jobs/{{ job.id }}">{{ job.title }}</a><div class="cell-meta">{{ job.job_type or "intervention" }} · #{{ "%04d" | format(job.id) }}</div></td>
+        <td><span class="badge {{ job.status.value }}">{{ job.status.value }}</span></td>
+        <td>
+          <span class="priority {{ 'urgent' if job.priority.value == 'urgent' else ('high' if job.priority.value == 'high' else '') }}">
+            <span class="bar"></span>{{ job.priority.value }}
+          </span>
+        </td>
+        <td>{{ job.customer.name if job.customer else "—" }}</td>
+        <td class="wrap">{{ job.location.label if job.location else "—" }}{% if job.location and job.location.city %}<div class="cell-meta">{{ job.location.city }}</div>{% endif %}</td>
+        <td class="num">
+          {% if job.window_start %}{{ job.window_start.strftime("%d/%m %H:%M") }}{% else %}—{% endif %}
+          {% if job.duration_minutes %}<div class="cell-meta">{{ job.duration_minutes }} min</div>{% endif %}
+        </td>
+        <td>
+          {% set assigned = resources | selectattr("id", "equalto", job.assigned_resource_id) | list %}
+          {{ assigned[0].name if assigned else "—" }}
+        </td>
+      </tr>
+      {% else %}
+      <tr class="empty-row"><td colspan="7">Aucune intervention{% if status_filter %} avec ce statut{% endif %}. <a href="/jobs/new">Créer une intervention</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

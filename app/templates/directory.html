@@ -1,56 +1,91 @@
 {% extends "base.html" %}
 {% block title %}Annuaire — FieldForge{% endblock %}
 {% block content %}
-<h1>Annuaire</h1>
+<div class="page-head">
+  <div class="titles">
+    <h1>Annuaire</h1>
+    <div class="sub">Clients, sites, compétences et équipes</div>
+  </div>
+</div>
 
-<h2>Clients</h2>
-<table>
-  <tr><th>Nom</th><th>Téléphone</th><th>Email</th></tr>
-  {% for c in customers %}<tr><td>{{ c.name }}</td><td>{{ c.phone or "—" }}</td><td>{{ c.email or "—" }}</td></tr>
-  {% else %}<tr><td colspan="3">Aucun client.</td></tr>{% endfor %}
-</table>
-<form method="post" action="/directory/customers/new" class="card">
-  <label>Nom</label><input type="text" name="name" required>
-  <label>Téléphone</label><input type="text" name="phone">
-  <label>Email</label><input type="email" name="email">
-  <input type="submit" value="Ajouter un client">
-</form>
+<h2>Clients <span class="count">{{ customers | length }}</span></h2>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Nom</th><th>Téléphone</th><th>Email</th></tr></thead>
+    <tbody>
+      {% for c in customers %}<tr><td>{{ c.name }}</td><td>{{ c.phone or "—" }}</td><td>{{ c.email or "—" }}</td></tr>
+      {% else %}<tr class="empty-row"><td colspan="3">Aucun client.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="card">
+  <form method="post" action="/directory/customers/new">
+    <div class="field-row">
+      <div><label>Nom</label><input type="text" name="name" required></div>
+      <div><label>Téléphone</label><input type="text" name="phone"></div>
+    </div>
+    <label>Email</label><input type="email" name="email">
+    <input type="submit" value="Ajouter un client">
+  </form>
+</div>
 
-<h2>Sites</h2>
-<table>
-  <tr><th>Libellé</th><th>Adresse</th><th>Ville</th><th>Zone</th></tr>
-  {% for l in locations %}<tr><td>{{ l.label }}</td><td>{{ l.address_line }}</td><td>{{ l.city or "—" }}</td><td>{{ l.zone or "—" }}</td></tr>
-  {% else %}<tr><td colspan="4">Aucun site.</td></tr>{% endfor %}
-</table>
-<form method="post" action="/directory/locations/new" class="card">
-  <label>Libellé</label><input type="text" name="label" required>
-  <label>Adresse</label><input type="text" name="address_line" required>
-  <label>Ville</label><input type="text" name="city">
-  <label>Code postal</label><input type="text" name="postal_code">
-  <label>Zone/secteur</label><input type="text" name="zone">
-  <label>Client</label>
-  <select name="customer_id">
-    <option value="">—</option>
-    {% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
-  </select>
-  <input type="submit" value="Ajouter un site">
-</form>
+<h2>Sites <span class="count">{{ locations | length }}</span></h2>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Libellé</th><th>Adresse</th><th>Ville</th><th>Zone</th><th>Client</th></tr></thead>
+    <tbody>
+      {% for l in locations %}<tr><td>{{ l.label }}</td><td class="wrap">{{ l.address_line }}</td><td>{{ l.city or "—" }}</td><td>{{ l.zone or "—" }}</td><td>{{ l.customer.name if l.customer else "—" }}</td></tr>
+      {% else %}<tr class="empty-row"><td colspan="5">Aucun site.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="card">
+  <form method="post" action="/directory/locations/new">
+    <div class="field-row">
+      <div><label>Libellé</label><input type="text" name="label" required></div>
+      <div><label>Adresse</label><input type="text" name="address_line" required></div>
+    </div>
+    <div class="field-row">
+      <div><label>Ville</label><input type="text" name="city"></div>
+      <div><label>Code postal</label><input type="text" name="postal_code"></div>
+    </div>
+    <div class="field-row">
+      <div><label>Zone/secteur</label><input type="text" name="zone"></div>
+      <div>
+        <label>Client</label>
+        <select name="customer_id">
+          <option value="">—</option>
+          {% for c in customers %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <input type="submit" value="Ajouter un site">
+  </form>
+</div>
 
-<h2>Compétences</h2>
-<table><tr><th>Nom</th></tr>
-  {% for s in skills %}<tr><td>{{ s.name }}</td></tr>{% else %}<tr><td>Aucune.</td></tr>{% endfor %}
-</table>
-<form method="post" action="/directory/skills/new" class="card">
-  <label>Nom</label><input type="text" name="name" required>
-  <input type="submit" value="Ajouter une compétence">
-</form>
+<h2>Compétences <span class="count">{{ skills | length }}</span></h2>
+<div class="table-wrap">
+  <table><thead><tr><th>Nom</th></tr></thead><tbody>
+    {% for s in skills %}<tr><td>{{ s.name }}</td></tr>{% else %}<tr class="empty-row"><td>Aucune compétence.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+<div class="card">
+  <form method="post" action="/directory/skills/new">
+    <label>Nom</label><input type="text" name="name" required>
+    <input type="submit" value="Ajouter une compétence">
+  </form>
+</div>
 
-<h2>Équipes</h2>
-<table><tr><th>Nom</th></tr>
-  {% for t in teams %}<tr><td>{{ t.name }}</td></tr>{% else %}<tr><td>Aucune.</td></tr>{% endfor %}
-</table>
-<form method="post" action="/directory/teams/new" class="card">
-  <label>Nom</label><input type="text" name="name" required>
-  <input type="submit" value="Ajouter une équipe">
-</form>
+<h2>Équipes <span class="count">{{ teams | length }}</span></h2>
+<div class="table-wrap">
+  <table><thead><tr><th>Nom</th></tr></thead><tbody>
+    {% for t in teams %}<tr><td>{{ t.name }}</td></tr>{% else %}<tr class="empty-row"><td>Aucune équipe.</td></tr>{% endfor %}
+  </tbody></table>
+</div>
+<div class="card">
+  <form method="post" action="/directory/teams/new">
+    <label>Nom</label><input type="text" name="name" required>
+    <input type="submit" value="Ajouter une équipe">
+  </form>
+</div>
 {% endblock %}
