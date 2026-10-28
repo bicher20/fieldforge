@@ -50,6 +50,24 @@ Puis ouvre http://localhost:8000 — identifiants de démo : `admin` / la valeur
 de `ADMIN_PASSWORD` dans `.env` (par défaut `change-me`, à changer avant toute
 exposition publique).
 
+## Tester sans rien installer (GitHub Codespaces)
+
+Pas de droits administrateur sur ta machine, ou juste envie de tester vite ?
+Sur la page du repo GitHub : **Code** → onglet **Codespaces** → **Create
+codespace on main**. Ça ouvre un environnement Linux dans le navigateur, avec
+Docker déjà configuré (voir `.devcontainer/`) — aucun droit admin local requis.
+Gratuit dans la limite du quota mensuel de ton compte GitHub.
+
+Une fois dans le terminal du Codespace :
+
+```bash
+nano .env   # ou ouvre .env directement dans l'éditeur VS Code du Codespace — remplis JWT_SECRET, ADMIN_PASSWORD, POSTGRES_PASSWORD
+docker compose up -d --build
+```
+
+VS Code (dans le navigateur) détecte le port 8000 et propose de l'ouvrir —
+clique sur la notification, ou va dans l'onglet **Ports** en bas.
+
 ## Déploiement sur un VPS (Docker)
 
 ```bash
