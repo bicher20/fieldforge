@@ -11,6 +11,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 # L'URL interne vers l'API n'est utilisée qu'au runtime (lib/api.ts est "server-only"
 # et lit process.env à chaque requête) ; aucune valeur ne doit être figée au build.
+#
+# SERVER_ACTIONS_ALLOWED_ORIGINS en revanche DOIT être connu au build : avec
+# output "standalone", Next.js résout next.config.ts une fois pendant `next build`
+# et fige le résultat dans .next/required-server-files.json — le fichier
+# next.config.ts lui-même n'est pas copié dans l'image standalone et n'est donc
+# plus relu au démarrage du conteneur.
+ARG SERVER_ACTIONS_ALLOWED_ORIGINS=""
+ENV SERVER_ACTIONS_ALLOWED_ORIGINS=$SERVER_ACTIONS_ALLOWED_ORIGINS
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 

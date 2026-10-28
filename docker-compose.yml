@@ -31,14 +31,16 @@ services:
       - fieldforge_uploads:/srv/app/app/static/uploads
 
   web:
-    build: ./web
+    build:
+      context: ./web
+      args:
+        SERVER_ACTIONS_ALLOWED_ORIGINS: ${SERVER_ACTIONS_ALLOWED_ORIGINS:-}
     restart: unless-stopped
     depends_on:
       - app
     environment:
       FIELDFORGE_API_URL: http://app:8000
       NODE_ENV: production
-      SERVER_ACTIONS_ALLOWED_ORIGINS: ${SERVER_ACTIONS_ALLOWED_ORIGINS:-}
     ports:
       - "${WEB_PORT:-3000}:3000"
 
