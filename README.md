@@ -83,8 +83,20 @@ nano .env   # ou ouvre .env directement dans l'éditeur VS Code du Codespace —
 docker compose up -d --build
 ```
 
-VS Code (dans le navigateur) détecte le port 8000 et propose de l'ouvrir —
-clique sur la notification, ou va dans l'onglet **Ports** en bas.
+VS Code (dans le navigateur) détecte les ports 8000 et 3000 et propose de les
+ouvrir — clique sur la notification, ou va dans l'onglet **Ports** en bas.
+
+Si tu utilises le frontend Next.js (`web/`) dans un Codespace, ajoute aussi
+dans `.env` avant le premier `docker compose up` :
+
+```
+SERVER_ACTIONS_ALLOWED_ORIGINS=*.app.github.dev,localhost:3000
+```
+
+(le tunnel de forwarding de port de Codespaces transmet un en-tête `Origin`
+qui ne correspond pas au host public vu par le navigateur ; sans ça,
+soumettre un formulaire — connexion incluse — échoue avec une erreur serveur.
+Voir `.env.example` pour le détail.)
 
 ## Déploiement sur un VPS (Docker)
 
