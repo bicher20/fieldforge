@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { listResources, listSkills, listTeams } from "@/lib/api";
 import { PageHead, SectionHeading, StatusBadge } from "@/components/ui";
 import { NewResourceForm } from "./form";
+import { toggleResourceActiveAction } from "./[id]/actions";
 
 export default async function ResourcesPage() {
   const [resources, teams, skills] = await Promise.all([listResources(), listTeams(), listSkills()]);
@@ -13,7 +15,7 @@ export default async function ResourcesPage() {
         subtitle={`${resources.length} technicien(s), chauffeur(s) et équipier(s)`}
       />
 
-      <div className="overflow-hidden rounded-md border border-border bg-surface shadow-sm">
+      <div className="overflow-x-auto rounded-md border border-border bg-surface shadow-sm">
         <table className="w-full border-collapse text-[0.85rem]">
           <thead>
             <tr className="bg-surface-alt text-left text-[0.72rem] uppercase tracking-wide text-text-soft">
@@ -24,26 +26,40 @@ export default async function ResourcesPage() {
               <th className="px-3.5 py-2.5 font-semibold">Véhicule</th>
               <th className="px-3.5 py-2.5 font-semibold">Compétences</th>
               <th className="px-3.5 py-2.5 font-semibold">Statut</th>
+              <th className="px-3.5 py-2.5 font-semibold"></th>
             </tr>
           </thead>
           <tbody>
             {resources.length === 0 && (
-              <tr><td colSpan={7} className="px-3.5 py-4 text-text-faint">Aucune ressource enregistrée.</td></tr>
+              <tr><td colSpan={8} className="px-3.5 py-4 text-text-faint">Aucune ressource enregistrée.</td></tr>
             )}
-            {resources.map((r) => (
-              <tr key={r.id} className="border-t border-border hover:bg-surface-alt">
-                <td className="px-3.5 py-2.5 font-medium">{r.name}</td>
-                <td className="px-3.5 py-2.5">{r.role}</td>
-                <td className="px-3.5 py-2.5">{r.team_id ? teamById.get(r.team_id)?.name ?? "—" : "—"}</td>
-                <td className="whitespace-normal px-3.5 py-2.5">
-                  {r.phone ?? "—"}
-                  {r.email && <div className="text-[0.78rem] text-text-faint">{r.email}</div>}
-                </td>
-                <td className="px-3.5 py-2.5">{r.vehicle_label ?? "—"}</td>
-                <td className="whitespace-normal px-3.5 py-2.5">{r.skills.length ? r.skills.map((s) => s.name).join(", ") : "—"}</td>
-                <td className="px-3.5 py-2.5"><StatusBadge status={r.active ? "done" : "cancelled"} /></td>
-              </tr>
-            ))}
+            {resources.map((r) => {
+              const boundToggle = toggleResourceActiveAction.bind(null, r.id);
+              return (
+                <tr key={r.id} className="border-t border-border hover:bg-surface-alt">
+                  <td className="px-3.5 py-2.5 font-medium">{r.name}</td>
+                  <td className="px-3.5 py-2.5">{r.role}</td>
+                  <td className="px-3.5 py-2.5">{r.team_id ? teamById.get(r.team_id)?.name ?? "—" : "—"}</td>
+                  <td className="whitespace-normal px-3.5 py-2.5">
+                    {r.phone ?? "—"}
+                    {r.email && <div className="text-[0.78rem] text-text-faint">{r.email}</div>}
+                  </td>
+                  <td className="px-3.5 py-2.5">{r.vehicle_label ?? "—"}</td>
+                  <td className="whitespace-normal px-3.5 py-2.5">{r.skills.length ? r.skills.map((s) => s.name).join(", ") : "—"}</td>
+                  <td className="px-3.5 py-2.5"><StatusBadge status={r.active ? "done" : "cancelled"} /></td>
+                  <td className="whitespace-nowrap px-3.5 py-2.5 text-right">
+                    <Link href={`/resources/${r.id}`} className="mr-3 text-[0.8rem] font-semibold text-accent hover:underline">
+                      Modifier
+                    </Link>
+                    <form action={boundToggle} className="inline">
+                      <button className="text-[0.8rem] font-semibold text-text-soft hover:underline">
+                        {r.active ? "Désactiver" : "Activer"}
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

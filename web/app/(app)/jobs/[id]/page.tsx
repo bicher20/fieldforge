@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getJob, listResources } from "@/lib/api";
 import { PageHead, PriorityTag, StatusBadge, inputClass } from "@/components/ui";
 import { assignAction, cancelAction, closeAction, photoAction, signatureAction, startAction } from "./actions";
@@ -27,7 +28,17 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       <PageHead
         title={job.title}
         subtitle={`#${String(job.id).padStart(4, "0")} · ${job.job_type ?? "intervention"} · créée le ${new Date(job.created_at).toLocaleDateString("fr-FR")}`}
-        action={<StatusBadge status={job.status} />}
+        action={
+          <div className="flex items-center gap-2.5">
+            <Link
+              href={`/jobs/${job.id}/edit`}
+              className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm font-semibold text-text hover:bg-surface-alt"
+            >
+              Modifier
+            </Link>
+            <StatusBadge status={job.status} />
+          </div>
+        }
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
